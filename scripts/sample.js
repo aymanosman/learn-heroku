@@ -2,17 +2,38 @@
 
 let co     = require('co');
 let heroku = require('heroku-client');
-let hk     = heroku.createClient({ token: process.env.HEROKU_API_KEY });
 
-let main = function* () {
-  let apps  = yield hk.apps().list();
-  let dynos = yield apps.map(getDynos);
+function* main() {
+  let hk = getHerokuClient();
+  try {
+    let apps  = yield hk.apps().list();
+    let dynos = yield apps.map(getDynos);
 
-  console.log(dynos);
+    console.log(dynos);
+  } catch (err) {
+    throw err;
+  }
 
   function getDynos(app) {
     return hk.apps(app.name).dynos().list();
   }
 };
 
-co(main)();
+co(main).catch(logError);
+
+function logError(err) {
+  console.log(err.stack);
+}
+
+function getHerokuClient() {
+  let key = "HEROKU_API_KEY";
+  let tok = process.env[key];
+
+  if (!tok) {
+    throw new Error('Must specify ' + key);
+  } else {
+    return heroku.createClient({
+      token: tok
+    });
+  }
+}

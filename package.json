@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "co": "4.6.0",
     "heroku-client": "2.3.2"
   }
 }
