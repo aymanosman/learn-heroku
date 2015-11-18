@@ -3,13 +3,13 @@
 let co     = require('co');
 let heroku = require('heroku-client');
 
-function* main() {
-  let hk = getHerokuClient();
-  try {
-    let apps  = yield hk.apps().list();
-    let dynos = yield apps.map(getDynos);
+co(main).catch(logError);
 
-    console.log(dynos);
+function* main() {
+  let appName = process.env.HEROKU_APP_NAME;
+  try {
+    let result = yield run(appName);
+    log(result);
   } catch (err) {
     throw err;
   }
@@ -19,7 +19,19 @@ function* main() {
   }
 };
 
-co(main).catch(logError);
+function* run(appName) {
+  let hk = getHerokuClient();
+
+  let apps  = yield hk.apps().list();
+  // log(apps.map((a) => a.name));
+  // let randomApp = apps[0];
+  // let addons = yield hk.apps(randomApp.name).addons().listByApp();
+  let addons = yield hk.apps(appName).addons().listByApp();
+  // let dynos = yield apps.map(getDynos);
+
+  let result = addons;
+  return result;
+}
 
 function logError(err) {
   console.log(err.stack);
@@ -37,3 +49,11 @@ function getHerokuClient() {
     });
   }
 }
+
+function log() {
+  console.log.apply(console, arguments);
+}
+
+module.exports = {
+  run: run
+};
