@@ -3,12 +3,19 @@
 let co     = require('co');
 let heroku = require('heroku-client');
 
+
+module.exports = {
+  run: run
+};
+
+
 co(main).catch(logError);
 
+
 function* main() {
-  let appName = process.env.HEROKU_APP_NAME;
+  let args = getArgs();
   try {
-    let result = yield run(appName);
+    let result = yield run(args.appName);
     log(result);
   } catch (err) {
     throw err;
@@ -38,22 +45,29 @@ function logError(err) {
 }
 
 function getHerokuClient() {
-  let key = "HEROKU_API_KEY";
-  let tok = process.env[key];
+  let args = getArgs();
 
-  if (!tok) {
-    throw new Error('Must specify ' + key);
-  } else {
-    return heroku.createClient({
-      token: tok
-    });
-  }
+  return heroku.createClient({
+    token: tok
+  });
+
 }
 
 function log() {
   console.log.apply(console, arguments);
 }
 
-module.exports = {
-  run: run
-};
+
+function getArgs() {
+  let key = "HEROKU_API_KEY";
+  let tok = process.env[key];
+
+  if (!tok) {
+    throw new Error('Must specify ' + key);
+  } else {
+    return {
+      appName: process.env.HEROKU_APP_NAME,
+      key: tok
+    };
+  }
+}
