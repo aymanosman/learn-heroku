@@ -1,6 +1,6 @@
 "use strict";
 
-let co     = require('co');
+let co = require('co');
 let heroku = require('heroku-client');
 
 
@@ -29,7 +29,7 @@ function* main() {
 function* run(appName) {
   let hk = getHerokuClient();
 
-  let apps  = yield hk.apps().list();
+  let apps = yield hk.apps().list();
   // log(apps.map((a) => a.name));
   // let randomApp = apps[0];
   // let addons = yield hk.apps(randomApp.name).addons().listByApp();
@@ -59,15 +59,20 @@ function log() {
 
 
 function getArgs() {
-  let key = "HEROKU_API_KEY";
-  let tok = process.env[key];
+  let tok = getEnvOrThrow("HEROKU_API_KEY");
+  let appName = getEnvOrThrow("HEROKU_APP_NAME");
 
-  if (!tok) {
-    throw new Error('Must specify ' + key);
-  } else {
-    return {
-      appName: process.env.HEROKU_APP_NAME,
-      key: tok
-    };
+  return {
+    appName: appName,
+    key: tok
+  };
+
+  function getEnvOrThrow(key) {
+    let val = process.env[key];
+    if (val) {
+      return val;
+    } else {
+      throw new Error('Must specify ' + key);
+    }
   }
 }
