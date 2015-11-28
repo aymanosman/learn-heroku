@@ -48,7 +48,7 @@ function getHerokuClient() {
   let args = getArgs();
 
   return heroku.createClient({
-    token: tok
+    token: args.key
   });
 
 }
